@@ -12,6 +12,7 @@ headlines=docs.find_all(["h1","h2","h3","h4","h5","h6"])
 head_text=""
 for heads in headlines:
     head_text=head_text+heads.text
+
 msg=[]
 for lines in headlines:
     clean=lines.text
@@ -32,7 +33,8 @@ if old_files != current_hash:
         
     token_id="8246761969:AAE9sz-XfjtFw92C9eZRg0qRcFExMu6Zjdw"
     user_id="1264677922"
-    message=f"Webpage Updated! \n\nTop Headlines:\n{head_text[:4000]}"
+    formatted_msg = "\n".join(msg)
+    message=f"Webpage Updated! \n\nTop Headlines:\n{formatted_msg[:4000]}"
     url = f"https://api.telegram.org/bot{token_id}/sendMessage"
     data = {"chat_id": user_id, "text": message}
     telegram_response = requests.post(url, data=data)
