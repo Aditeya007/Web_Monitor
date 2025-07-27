@@ -8,7 +8,7 @@ web_response=requests.get(link)
 txt=web_response.text
 
 docs=BeautifulSoup(txt,"html.parser")
-headlines=docs.find_all(["h1","h2","h3","h4","h5","h6"]) 
+headlines=docs.find_all(["h1","h2","h3"]) 
 head_text=""
 for heads in headlines:
     head_text=head_text+heads.text
