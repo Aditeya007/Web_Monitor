@@ -4,6 +4,8 @@ import requests
 from bs4 import BeautifulSoup   
 
 link=input("Enter URL of the desired webpage:")
+token_id=input("Enter your Bot token id")
+user_id=input("Enter your chat id")
 web_response=requests.get(link)
 txt=web_response.text
 
@@ -30,9 +32,9 @@ if old_files != current_hash:
     print("Content Updated")
     with open(hash_file, "w") as fr:
         fr.write(current_hash)
+
         
-    token_id="8246761969:AAE9sz-XfjtFw92C9eZRg0qRcFExMu6Zjdw"
-    user_id="1264677922"
+    
     formatted_msg = "\n".join(msg)
     message=f"Webpage Updated! \n\nTop Headlines:\n{formatted_msg[:4000]}"
     url = f"https://api.telegram.org/bot{token_id}/sendMessage"
