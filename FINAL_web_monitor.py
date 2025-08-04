@@ -9,7 +9,16 @@ def get_user_inputs():
     token_id = input("Enter your Bot token id: ")
     user_id = input("Enter your chat id: ")
     api_token = input("Enter your Hugging Face API token: ")
-    return link, token_id, user_id, api_token
+    try:
+        total_minutes = int(input("⏱ Enter total monitoring duration (in minutes): "))
+        interval_minutes = int(input("🔁 Enter check interval (in minutes): "))
+        if total_minutes <= 0 or interval_minutes <= 0:
+            raise ValueError
+    except ValueError:
+        print("❌ Invalid time values. Please enter positive integers.")
+        exit(1)
+
+    return link, token_id, user_id, api_token, total_minutes, interval_minutes
 
 def fetch_headlines(link):
     try:
@@ -112,8 +121,24 @@ def check_and_notify(link, token_id, user_id, api_token):
     send_telegram(token_id, user_id, message)
 
 def main():
-    link, token_id, user_id, api_token = get_user_inputs()
-    check_and_notify(link, token_id, user_id, api_token)
+    link, token_id, user_id, api_token, total_minutes, interval_minutes = get_user_inputs()
+    end_time = time.time() + total_minutes * 60
+
+    print(f"\n🚀 Monitoring started for {total_minutes} minutes. Checking every {interval_minutes} minutes.\n")
+
+    while time.time() < end_time:
+        print("🔄 Running check...")
+        check_and_notify(link, token_id, user_id, api_token)
+
+        remaining = int(end_time - time.time())
+        if remaining < interval_minutes * 60:
+            print(f"⏳ Final wait: {remaining // 60} min {remaining % 60} sec...\n")
+            time.sleep(remaining)
+        else:
+            print(f"⏳ Sleeping for {interval_minutes} minutes...\n")
+            time.sleep(interval_minutes * 60)
+
+    print("✅ Monitoring finished. Exiting.\n")
 
 if __name__ == "__main__":
     main()
