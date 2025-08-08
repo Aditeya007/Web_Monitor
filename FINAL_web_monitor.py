@@ -22,7 +22,10 @@ def get_user_inputs():
 
 def fetch_headlines(link):
     try:
-        response = requests.get(link, timeout=10)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        }
+        response = requests.get(link, headers=headers, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
         headlines = soup.find_all(["h1", "h2", "h3"])
@@ -80,8 +83,15 @@ def check_and_notify(link, token_id, user_id, api_token):
         with open(hash_file, "r") as f:
             old_hash = f.read().strip()
 
+    # ✅ Send a message even if no changes
     if old_hash == current_hash:
         print("✅ No changes detected.")
+
+        message = (
+            "✅ *No content changes detected.*\n"
+            "🕰️ _Checked at: " + time.strftime('%d %b %Y, %I:%M %p') + "_"
+        )
+        send_telegram(token_id, user_id, message)
         return
 
     print("🔔 Content updated!")
@@ -124,21 +134,26 @@ def main():
     link, token_id, user_id, api_token, total_minutes, interval_minutes = get_user_inputs()
     end_time = time.time() + total_minutes * 60
 
-    print(f"\n🚀 Monitoring started for {total_minutes} minutes. Checking every {interval_minutes} minutes.\n")
+    print(f"\n🚀 Monitoring started for {total_minutes} minutes. Checking every {interval_minutes} minutes.")
+    print("🛑 Press Ctrl+C to stop monitoring early.\n")
 
-    while time.time() < end_time:
-        print("🔄 Running check...")
-        check_and_notify(link, token_id, user_id, api_token)
+    try:
+        while time.time() < end_time:
+            print("🔄 Running check...")
+            check_and_notify(link, token_id, user_id, api_token)
 
-        remaining = int(end_time - time.time())
-        if remaining < interval_minutes * 60:
-            print(f"⏳ Final wait: {remaining // 60} min {remaining % 60} sec...\n")
-            time.sleep(remaining)
-        else:
-            print(f"⏳ Sleeping for {interval_minutes} minutes...\n")
-            time.sleep(interval_minutes * 60)
+            remaining = int(end_time - time.time())
+            if remaining < interval_minutes * 60:
+                print(f"⏳ Final wait: {remaining // 60} min {remaining % 60} sec...\n")
+                time.sleep(remaining)
+            else:
+                print(f"⏳ Sleeping for {interval_minutes} minutes...\n")
+                time.sleep(interval_minutes * 60)
 
-    print("✅ Monitoring finished. Exiting.\n")
+    except KeyboardInterrupt:
+        print("\n🛑 Monitoring manually stopped by user (Ctrl+C). Exiting...\n")
+
+    print("✅ Monitoring finished.\n")
 
 if __name__ == "__main__":
     main()
